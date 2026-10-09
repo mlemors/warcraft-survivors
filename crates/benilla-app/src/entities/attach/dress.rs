@@ -331,7 +331,16 @@ pub(super) fn spawn_part(
     if skinned {
         child.insert(benilla_world::rig_palette::RigPart(dress.unit));
     }
-    if dress.rigged && part.skinned_mesh.is_some() {
+    if dress.kind == ModelKind::Creature {
+        // Units arrive only inside the server's visibility stream. Their per-batch boxes can be
+        // stale or incomplete for animated creature assets; culling each batch independently can
+        // hide the whole body while its separately projected blob shadow remains visible. Keep
+        // the authored/fallback box for picking, but let the unit visibility stream bound draws.
+        if let Some(aabb) = dress.idle_aabb.or(part.aabb) {
+            child.insert(aabb);
+        }
+        child.insert(NoFrustumCulling);
+    } else if dress.rigged && part.skinned_mesh.is_some() {
         // The reference elects one sphere per object each frame, never one per batch
         // (`0x683340`), so the root's election owns the view cull (`exterior_cull`) and
         // `NoFrustumCulling` keeps Bevy's per-part test away. The `Aabb` then serves only the
