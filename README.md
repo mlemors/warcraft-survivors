@@ -1,143 +1,123 @@
 <div align="center">
   <h1>Warcraft Survivors</h1>
-  <p><b>A Vampire Survivors-style roguelite played in the world of World of Warcraft 1.12.1</b></p>
-  <p>Built on <a href="https://github.com/samwhosung/benilla">benilla</a>, a from-scratch 1.12.1 client in Rust and <a href="https://bevy.org">Bevy</a></p>
+  <p><b>A Vampire Survivors-style roguelite set in the world of World of Warcraft 1.12.1</b></p>
+  <p>A personal fork by <a href="https://github.com/mlemors">mlemors</a>, based on <a href="https://github.com/AdamMcWilliam/warcraft-survivors">the original Warcraft Survivors project</a> and powered by <a href="https://github.com/samwhosung/benilla">benilla</a>.</p>
 </div>
 
-Pick a class and a hero, pick a battleground, and survive fifteen minutes against an ever-growing
-horde of the zone's own creatures. Your spells cast themselves; you only move. Every level offers
-three cards: a new spell from your class, a higher rank of one you have, or a passive blessing.
-A boss arrives every two and a quarter minutes, and the last of them guards the final stretch.
+Choose a class and battleground, then survive for fifteen minutes against an ever-growing horde. Your spells cast automatically; you focus on moving, collecting experience and choosing upgrades. Bosses arrive throughout the run, with the final encounter at 13:30.
 
-Everything on screen is the real game, read at runtime from your own 1.12.1 install: the
-terrain, the creatures and their animations, the spell visuals, the sounds and the interface art.
-This repository ships none of it.
+The game reads terrain, creatures, animations, spell effects, sounds and interface art from your own World of Warcraft client at runtime. This repository does not include those game assets.
 
-## What you need
+## Requirements
 
-- **Your own English World of Warcraft 1.12.1 client (build 5875).** Warcraft Survivors only
-  reads it, and never writes to it.
-- **Rust**, from [rustup](https://rustup.rs). The repository pins its toolchain in
-  `rust-toolchain.toml`, so rustup fetches the right version on the first build.
-- **A C compiler**, because the client's Lua is built from source:
-  - Windows: the MSVC build tools, which the Rust installer offers to set up.
-  - macOS: the Xcode command line tools (`xcode-select --install`).
-  - Linux: the ALSA and udev development packages and `pkg-config` (on Debian or Ubuntu,
-    `sudo apt install build-essential pkg-config libasound2-dev libudev-dev`).
+- Your own World of Warcraft 1.12.1 client, build 5875. The game reads the client files and does not modify them.
+- [Rust](https://rustup.rs). `rust-toolchain.toml` selects the required toolchain through rustup.
+- A C compiler and platform dependencies:
+  - **Windows:** MSVC build tools.
+  - **macOS:** Xcode Command Line Tools (`xcode-select --install`).
+  - **Linux:** ALSA and udev development packages, plus `pkg-config`. On Debian or Ubuntu:
+    `sudo apt install build-essential pkg-config libasound2-dev libudev-dev`.
 
-No server and no account are needed: the mode runs entirely offline.
+No game server or account is needed. Survivors mode runs offline.
 
-## Setup
+## Install and run
 
-1. Clone this branch:
+Clone this fork:
 
-   ```sh
-   git clone -b survivors https://github.com/AdamMcWilliam/warcraft-survivors.git
-   cd warcraft-survivors
-   ```
+```sh
+git clone https://github.com/mlemors/warcraft-survivors.git
+cd warcraft-survivors
+```
 
-2. Point it at your WoW install, either by linking the install folder as `WoW` at the repo root
-   (the folder that contains `WoW.exe` and `Data`):
+Give the game access to your WoW data in either of these ways:
+
+1. Create a `WoW` link in the repository root that points to your client installation directory (the directory containing `Data`). On Windows, use PowerShell:
 
    ```powershell
-   # Windows (PowerShell, no admin rights needed)
    New-Item -ItemType Junction -Path WoW -Target "C:\path\to\WoW"
    ```
 
+   On macOS or Linux:
+
    ```sh
-   # macOS / Linux
    ln -s /path/to/WoW WoW
    ```
 
-   or by setting `WOW_DATA` to the install's `Data` folder each time you run it
-   (`$env:WOW_DATA="C:\path\to\WoW\Data"` in PowerShell, `export WOW_DATA=/path/to/WoW/Data`
-   elsewhere). The `WoW` link is ignored by git, so it never gets committed.
+2. Or set `WOW_DATA` to the client's `Data` directory before launching. In PowerShell:
 
-3. Build and play:
-
-   ```sh
-   cargo survivors
+   ```powershell
+   $env:WOW_DATA = "C:\path\to\WoW\Data"
    ```
 
-   That is an alias for `cargo run --profile play -p warcraft-survivors`. The first build
-   compiles the whole engine and takes several minutes; after that it starts in seconds. The
-   built game is `target/play/warcraft-survivors` (`.exe` on Windows), which you can also launch
-   directly or pin as a shortcut.
+   On macOS or Linux:
 
-## How to play
+   ```sh
+   export WOW_DATA=/path/to/WoW/Data
+   ```
 
-| Input | Does |
-|---|---|
-| `W` `A` `S` `D` or the arrow keys | Move |
-| Mouse wheel | Zoom the camera |
-| Hover a spell or passive icon (top left) | Its tooltip: rank, range, cooldown, what it does now and what the next rank adds |
-| `1` `2` `3` or click | Take a level-up card |
-| `Esc` | Pause and resume |
-| `Enter` | Start the run from the menu, or return to the menu after one |
+The `WoW` link is ignored by git. Start the game with:
 
-- **Classes:** Warrior, Paladin, Hunter, Rogue, Priest, Shaman, Mage, Warlock and Druid, each
-  with its own spell pool and the real spell visuals. The heroes on offer are the looks of that
-  class's trainers.
-- **Experience:** slain enemies drop wisps; walk near them to pull them in. Now and then an enemy
-  drops a turkey leg that heals you, and every boss drops one that heals you fully.
-- **Pressure:** the horde grows and toughens over the run, and half way between bosses a ring of
-  enemies closes in from every side.
-- **Victory:** still standing at 15:00.
-
-## Battlegrounds
-
-Each battleground has its own roster that climbs from the zone's weakest creatures to its
-deadliest, and six bosses drawn from the zone and its dungeons and raids. Each is a compact
-arena: an invisible boundary keeps the fight in view.
-
-| Battleground | Zone | The horde | Final boss |
-|---|---|---|---|
-| The Barrens | Kalimdor | Plains beasts, quilboar, centaur and harpies | Hezrul Bloodmark |
-| The Dark Portal | Blasted Lands | Hyenas, scorpids and the Burning Legion | Lord Kazzak |
-| Gates of Ahn'Qiraj | Silithus | The silithid swarm and the Qiraji | Ossirian the Unscarred |
-| Fire Plume Ridge | Un'Goro Crater | Dinosaurs, oozes and fire elementals, beside the lava lake | King Mosh |
-| Gurubashi Arena | Stranglethorn Vale | Jungle beasts and the Gurubashi trolls | Hakkar |
-| Blackrock Mountain | Burning Steppes | The Blackrock orcs, worgs and the black dragonflight | Nefarian |
-| Kodo Graveyard | Desolace | Scorpashi, basilisks, demons and dying kodo | Princess Theradras |
-| Winterspring | Lake Kel'Theril | Owls, chimaeras, Highborne and the blue dragonflight | Azuregos |
-| Mount Hyjal | Kalimdor | The Legion, the Scourge and the dragons of Nightmare | Ysondre |
-| Naxxramas | Eastern Plaguelands | The Scourge of Plaguewood, beneath the necropolis | Kel'Thuzad |
-
-Mount Hyjal is unfinished in 1.12 and has no creatures of its own, so its horde is a themed one.
-
-## For developers
-
-The mode lives in [`crates/benilla-app/src/survivors/`](crates/benilla-app/src/survivors/) (the
-classes, spells, battlegrounds and their rosters are tables in `data.rs`), and its launcher in
-[`crates/warcraft-survivors/`](crates/warcraft-survivors/). It boots the benilla client with no
-server: the hero, the horde and the drops are local entities dressed by the engine's own model,
-animation and spell-visual systems.
-
-A hands-off autopilot plays a run for testing:
-
-```powershell
-$env:WOW_SURVIVORS_AUTO="Mage"         # a class; add :all for its whole spell pool, :late to start deep into a run, :idle to stand still
-$env:WOW_SURVIVORS_MAP="Naxxramas"     # a battleground, by index (0-9) or part of its name
-$env:WOW_SURVIVORS_SHOTS="C:\shots"    # optional: a screenshot every few seconds
+```sh
 cargo survivors
 ```
 
-It logs a line every ten seconds (`survivors auto: ...`). The rest of benilla, the complete 1.12.1
-client, is still here and still builds: see the
-[benilla README](https://github.com/samwhosung/benilla#running-it) and
-[`docs/`](docs/).
+The first run compiles the project and may take several minutes. Later launches are faster. The command builds and runs `warcraft-survivors`; the executable is written to `target/play/` (`warcraft-survivors.exe` on Windows).
 
-## Credits and legal
+## How to play
 
-Warcraft Survivors is a fork of [benilla](https://github.com/samwhosung/benilla) by its authors,
-which does all the heavy lifting: every file format, the renderer, the animation and spell
-systems, and the interface engine.
+| Input | Action |
+|---|---|
+| `W` `A` `S` `D` or arrow keys | Move |
+| Mouse wheel | Zoom the camera |
+| Hover over a spell or passive icon | Read its tooltip and upgrade details |
+| `1`, `2`, `3` or click | Choose a level-up card |
+| `Esc` | Pause or resume |
+| `Enter` | Start from the menu or return to it after a run |
 
-This is an independent fan project, not affiliated with or endorsed by Blizzard Entertainment.
-It ships **no Blizzard content**: no art, models, sounds, maps, MPQ contents or FrameXML. You
-provide your own legally obtained 1.12.1 client. World of Warcraft and Warcraft are trademarks of
-Blizzard Entertainment, Inc. Vampire Survivors is a trademark of poncle.
+- **Classes:** Warrior, Paladin, Hunter, Rogue, Priest, Shaman, Mage, Warlock and Druid. Each has its own spell pool and class-themed heroes.
+- **Level-ups:** Enemies drop experience wisps. Collect them to choose a new spell, improve a spell or gain a passive blessing.
+- **Healing:** Some enemies drop turkey legs; bosses always drop one that fully heals you.
+- **Difficulty:** The horde grows stronger over time. Between boss encounters, an enemy ring closes in from around the arena.
+- **Goal:** Survive until 15:00.
 
-The code is licensed under [MIT](LICENSE-MIT) or [Apache 2.0](LICENSE-APACHE), at your option, as
-benilla is. The two vendored components under `third_party/`, the kira audio engine and a Lua 5.1
-patched to the 1.12 client's dialect, keep their own upstream licenses, alongside each.
+## Battlegrounds
+
+Each battleground has its own creature roster and six boss encounter slots, drawn from the zone and related dungeons or raids.
+
+| Battleground | Zone | Creatures | Final boss |
+|---|---|---|---|
+| The Barrens | Kalimdor | Plains beasts, quilboar, centaur and harpies | Hezrul Bloodmark |
+| The Dark Portal | Blasted Lands | Hyenas, scorpids and the Burning Legion | Lord Kazzak |
+| Gates of Ahn'Qiraj | Silithus | Silithids and the Qiraji | Ossirian the Unscarred |
+| Fire Plume Ridge | Un'Goro Crater | Dinosaurs, oozes and fire elementals | King Mosh |
+| Gurubashi Arena | Stranglethorn Vale | Jungle beasts and Gurubashi trolls | Hakkar |
+| Blackrock Mountain | Burning Steppes | Blackrock orcs, worgs and the black dragonflight | Nefarian |
+| Kodo Graveyard | Desolace | Scorpashi, basilisks, demons and kodo | Princess Theradras |
+| Winterspring | Winterspring | Owls, chimaeras, Highborne and blue dragons | Azuregos |
+| Mount Hyjal | Kalimdor | The Legion, the Scourge and dragons of Nightmare | Ysondre |
+| Naxxramas | Eastern Plaguelands | The Scourge of Plaguewood | Kel'Thuzad |
+
+Mount Hyjal has no creature roster of its own in the 1.12.1 client, so its enemies are themed for the location. The Barrens uses the shared fallback boss roster for encounters without a map-specific boss.
+
+## Developer options
+
+Survivors mode is implemented in [`crates/benilla-app/src/survivors/`](crates/benilla-app/src/survivors/), with its launcher in [`crates/warcraft-survivors/`](crates/warcraft-survivors/). It runs locally on the benilla client without connecting to a server.
+
+An autopilot can run a hands-off session:
+
+```powershell
+$env:WOW_SURVIVORS_AUTO = "Mage"          # Add :all, :late or :idle to change the run
+$env:WOW_SURVIVORS_MAP = "Naxxramas"      # Map name or index from 0 to 9
+$env:WOW_SURVIVORS_SHOTS = "C:\shots"     # Optional screenshot output directory
+cargo survivors
+```
+
+The autopilot chooses level-up cards, moves to collect experience and logs its progress every ten seconds. See the [benilla README](https://github.com/samwhosung/benilla#running-it) and [`docs/`](docs/) for the underlying client and development documentation.
+
+## Credits and licensing
+
+This repository is a personal fork of [AdamMcWilliam/warcraft-survivors](https://github.com/AdamMcWilliam/warcraft-survivors). The game is built on [benilla](https://github.com/samwhosung/benilla), which provides the 1.12.1 client, file readers, renderer, animation and spell systems, and interface engine.
+
+This is an independent fan project and is not affiliated with or endorsed by Blizzard Entertainment. It contains no Blizzard game assets or client data. You must provide your own legally obtained client. World of Warcraft and Warcraft are trademarks of Blizzard Entertainment, Inc.; Vampire Survivors is a trademark of poncle.
+
+The code is available under the [MIT License](LICENSE-MIT) or [Apache License 2.0](LICENSE-APACHE), at your option. Vendored components in `third_party/` retain their own upstream licenses.
